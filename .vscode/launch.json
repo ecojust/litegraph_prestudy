@@ -1,0 +1,19 @@
+{
+  "configurations": [
+    {
+      "name": "HTTP Server",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "http-server",
+      "runtimeArgs": ["-p", "8888"],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "webSocket:3000",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node"
+    }
+  ]
+}
