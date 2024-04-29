@@ -9,6 +9,7 @@ function WebSocketNode() {
     this.size = [220, 92];
     this.connected = false;
     this.triggered = true;
+    this.error = true;
 
     // this.color = "#36f";
     this.title = "WebSocket #";
@@ -22,10 +23,14 @@ function WebSocketNode() {
 WebSocketNode.prototype.onExecute = function (param, options) {
     const vm = this;
     if (this.properties.URL && !this.connected) {
+        vm.trigger("onDrawBackground");
+
         this.connected = true
         this.socket = new WebSocket(this.properties.URL);
         this.socket.onopen = function () {
             console.log('WebSocket连接已建立');
+            vm.error = false
+
         };
         this.socket.onmessage = function (event) {
             vm.setOutputData(0, event.data);
@@ -40,15 +45,22 @@ WebSocketNode.prototype.onExecute = function (param, options) {
         this.socket.onclose = () => {
             vm.connected = false
             vm.socket = null;
+            this.error = true
+
         }
     }
 };
 
 WebSocketNode.prototype.onDrawBackground = function (ctx) {
-    this.boxcolor = this.triggered
-        ? "#0F0"
-        : "#222";
-    this.triggered = false;
+    if (this.error) {
+        this.boxcolor = "#f00"
+    } else {
+        this.boxcolor = this.triggered
+            ? "#0F0"
+            : "#222";
+        this.triggered = false;
+    }
+
 };
 
 
