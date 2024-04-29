@@ -1,0 +1,82 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/lib/litegraph.css" />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body class="litegraph">
+    <canvas id="mycanvas"></canvas>
+    <script type="text/javascript" src="/lib/litegraph.js"></script>
+    <script type="module">
+      import WebSocketNode from "./node/WebSocketNode.js";
+      import HTMLElementNode from "./node/HTMLElementNode.js";
+
+      LiteGraph.registerNodeType("basic/socket", WebSocketNode);
+      LiteGraph.registerNodeType("basic/HTMLElement", HTMLElementNode);
+
+      var graph = new LGraph();
+      var canvas = document.querySelector("#mycanvas");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      new LGraphCanvas("#mycanvas", graph);
+
+      readConfiguration();
+
+      function autoSave() {
+        var workspaceData = graph.serialize();
+        var jsonData = JSON.stringify(workspaceData);
+        localStorage.setItem("workspaceData", jsonData);
+      }
+
+      function readConfiguration() {
+        var jsonData = localStorage.getItem("workspaceData");
+        if (jsonData) {
+          var workspaceData = JSON.parse(jsonData);
+          var error = graph.configure(workspaceData);
+          if (!error) {
+            console.log("工作区数据加载成功");
+            graph.start();
+            setInterval(autoSave, 1000);
+          } else {
+            console.error("工作区数据加载失败");
+          }
+        } else {
+          var node_const = LiteGraph.createNode("basic/string");
+          node_const.pos = [200, 200];
+          graph.add(node_const);
+          node_const.setValue("www.baidu.com");
+
+          var node_socket = LiteGraph.createNode("basic/socket");
+          node_socket.pos = [400, 300];
+          node_socket.mode = LiteGraph.ALWAYS;
+
+          graph.add(node_socket);
+
+          var node_watch = LiteGraph.createNode("basic/watch");
+          node_watch.pos = [700, 200];
+          graph.add(node_watch);
+
+          node_const.connect(0, node_socket, 0);
+
+          var line = node_socket.connect(0, node_watch, 0);
+          graph.start();
+          setInterval(autoSave, 1000);
+        }
+      }
+    </script>
+  </body>
+</html>
